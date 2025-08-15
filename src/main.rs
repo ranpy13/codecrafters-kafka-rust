@@ -32,7 +32,7 @@ fn main() -> Result<()>{
                 // let mut _stream = _stream;
                 _stream.write_all(&[0, 0, 0, 0, 0, 0, 0, 0]).unwrap();
 
-                let message_size = 0i32;
+                let message_size = 1i32;
                 let correlation_id: i32 = 7i32;
 
                 let mut buf = BytesMut::with_capacity(8);
