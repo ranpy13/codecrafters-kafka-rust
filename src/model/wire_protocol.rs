@@ -1,3 +1,5 @@
+#![warn(dead_code)]
+
 use std::ptr::null;
 
 use anyhow::Error;

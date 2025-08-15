@@ -51,10 +51,10 @@ fn main() -> Result<()>{
                 let response = Response {
                     message_size: message_size,
                     header: header,
-                    body: String::new(),
+                    body: String::from("something"),
                 };
 
-                let _response2 = Response::new(message_size, header2, String::new());
+                let _response2 = Response::new(message_size, header2, String::from("some random body"));
 
                 let mut res = Vec::new();
 
