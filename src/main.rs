@@ -4,15 +4,20 @@ use anyhow::Result;
 
 use bytes::{BufMut, BytesMut};
 
-use crate::model::wire_protocol;
+use crate::model::wire_protocol::{self, Header, Response};
 use log::{info, warn, error};
 use env_logger::Env;
 
 mod model;
 
 fn main() -> Result<()>{
+    // env_logger::init();
+    env_logger::Builder::new()
+    .filter_level(log::LevelFilter::Info)
+    .init();
+
     // You can use print statements as follows for debugging, they'll be visible when running tests.
-    println!("Logs from your program will appear here!");
+    info!("Logs from your program will appear here!");
 
     
     let listener = TcpListener::bind("127.0.0.1:9092").unwrap();
@@ -36,6 +41,27 @@ fn main() -> Result<()>{
                 buf.put_i32(correlation_id);
 
                 _stream.write_all(&buf)?;
+
+                let header = Header {
+                    correlation_id: correlation_id,
+                };
+
+                let header2 = Header::new(correlation_id)?;
+
+                let response = Response {
+                    message_size: message_size,
+                    header: header,
+                    body: String::new(),
+                };
+
+                let _response2 = Response::new(message_size, header2, String::new());
+
+                let mut res = Vec::new();
+
+                res.extend_from_slice(&response.message_size.to_be_bytes());
+                res.extend_from_slice(&response.header.correlation_id.to_be_bytes());
+
+                let _ = _stream.write_all(&res);
             }
             Err(e) => {
                 println!("error: {}", e);

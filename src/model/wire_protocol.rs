@@ -1,17 +1,39 @@
+use std::ptr::null;
+
+use anyhow::Error;
+
 pub struct Request {
     // to figure out
 }
 
+pub struct Header {
+    pub correlation_id: i32,
+}
+
+impl Header {
+    pub fn new(correlation_id: i32) -> Result<Self, Error> {
+        let header = Header {
+            correlation_id: correlation_id,
+        };
+
+        Ok(header)
+    }
+
+    pub fn is_valid(&self) -> bool {
+        return self.correlation_id.is_negative()
+    }
+}
+
 pub struct Response {
     pub message_size: i32,
-    pub header: String,
+    pub header: Header,
     pub body: String,
 }
 
 impl Response {
-    pub fn new(message_size: i32, header: String, body: String) -> Response {
+    pub fn new(message_size: i32, header: Header, body: String) -> Response {
         assert!(message_size.is_positive());
-        assert!(!header.is_empty());
+        assert!(!header.is_valid());
         assert!(!body.is_empty());
 
         Self {
