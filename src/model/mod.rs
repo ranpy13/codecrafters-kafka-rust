@@ -1,1 +1,1 @@
-pub mod WireProtocol;
+pub mod wire_protocol;
