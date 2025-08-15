@@ -1,0 +1,16 @@
+{
+    "workbench.colorCustomizations": {
+        "[Greyboard]": {
+            "editor.background":"#161616",
+            "actionBar.toggledBackground": "#161616",
+            "activityBar.activeBackground": "#161616",
+            "activityBar.background": "#161616",
+            "panel.background": "#161616",
+            "sideBar.background": "#161616",
+            "terminal.background": "#161616",
+            "menu.background": "#161616",
+            "titleBar.activeBackground": "#161616",
+            "button.background": "#4a4a4a",
+        }
+    }
+}
