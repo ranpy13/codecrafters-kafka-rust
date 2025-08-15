@@ -9,7 +9,7 @@ pub struct Response {
 }
 
 impl Response {
-    pub fn new(message_size: i32, header: String, body: String) {
+    pub fn new(message_size: i32, header: String, body: String) -> Response {
         assert!(message_size.is_positive());
         assert!(!header.is_empty());
         assert!(!body.is_empty());
