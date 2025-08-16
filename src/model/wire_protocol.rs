@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::ptr::null;
 
 use anyhow::Error;
@@ -7,15 +9,23 @@ pub struct Request {
     // to figure out
 }
 
-#[derive(Clone, Copy)]
-pub struct Header {
+#[derive(Clone)]
+pub struct Header<'a> {
+    pub request_api_key: i16,
+    pub request_api_version: i16,
     pub correlation_id: i32,
+    pub client_id: Option<String>,
+    pub tag_buffer: Vec<&'a str> 
 }
 
-impl Header {
-    pub fn new(correlation_id: &i32) -> Result<Self, Error> {
+impl<'a> Header<'a> {
+    pub fn new(reqeust_api_key: &i16, request_api_version: &i16, correlation_id: &i32, client_id: &Option<String>, tag_buffer: &Vec<&'a str>) -> Result<Self, Error> {
         let header = Header {
+            request_api_key: *reqeust_api_key,
+            request_api_version: *request_api_version,
             correlation_id: *correlation_id,
+            client_id: client_id.clone(),
+            tag_buffer: tag_buffer.clone(),
         };
 
         Ok(header)
@@ -27,23 +37,25 @@ impl Header {
 }
 
 #[allow(dead_code)]
-pub struct Response {
+pub struct Response<'a> {
     pub message_size: i32,
-    pub header: Header,
+    pub header: Header<'a>,
     pub body: String,
 }
 
-impl Response {
-    pub fn new(message_size: &i32, header: &Header, body: &String) -> Response {
+impl<'a> Response<'a> {
+    pub fn new(message_size: &i32, header: &Header<'a>, body: &String) -> Response<'a> {
         assert!(message_size.is_positive());
         assert!(!header.is_valid());
         assert!(!body.is_empty());
 
-        Self {
+        let response = Response {
             message_size: *message_size,
-            header: *header,
+            header: header.clone(),
             body: body.clone(),
-        }
+        };
+
+        response
     }
 }
 
