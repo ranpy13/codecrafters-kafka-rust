@@ -47,7 +47,7 @@ impl<'a> Header<'a> {
                 header.extend_from_slice(s.as_bytes());
             }
             None => {
-
+                header.extend_from_slice(&0i16.to_be_bytes());
             }
             
         }

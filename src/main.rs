@@ -93,6 +93,7 @@ fn main() -> Result<()>{
 
                 res.extend_from_slice(&response.message_size.to_be_bytes());
                 res.extend_from_slice(&response.header.correlation_id.to_be_bytes());
+                res.extend_from_slice(&0i16.to_be_bytes());
 
                 info!("Message Size: {}", message_size);
                 info!("Correlation id: {}", correlation_id);
