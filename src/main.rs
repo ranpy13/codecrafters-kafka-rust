@@ -97,10 +97,14 @@ fn main() -> Result<()>{
 
                 res.extend_from_slice(&response.body.error_code.to_be_bytes());
                 res.extend_from_slice(&response.body.array_length.to_be_bytes());
+                
                 res.extend_from_slice(&response.body.api_version_array.api_key.to_be_bytes());
                 res.extend_from_slice(&response.body.api_version_array.min_version.to_be_bytes());
                 res.extend_from_slice(&response.body.api_version_array.max_version.to_be_bytes());
+                res.extend_from_slice(&response.body.api_version_array.tag_buffer.to_be_bytes());
+
                 res.extend_from_slice(&response.body.throttle_time.to_be_bytes());
+                res.extend_from_slice(&response.body.tag_buffer.to_be_bytes());
             
 
                 let _ = _stream.write_all(&res);
