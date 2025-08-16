@@ -33,7 +33,7 @@ fn main() -> Result<()>{
                 // let mut _stream = _stream;
                 // _stream.write_all(&[0, 0, 0, 5, 0, 0, 0, 7]).unwrap();
 
-                let mut request = [0u8; 512];
+                let mut request = [0u8; 39];
                 _stream.read_exact(&mut request)?;
 
                 debug!("Raw reqeust: {:?}", request);
