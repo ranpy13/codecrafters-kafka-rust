@@ -33,7 +33,7 @@ fn main() -> Result<()>{
                 // let mut _stream = _stream;
                 // _stream.write_all(&[0, 0, 0, 5, 0, 0, 0, 7]).unwrap();
 
-                let mut request = [0u8; 39];
+                let mut request = [0u8; 512];
                 _stream.read_exact(&mut request)?;
 
                 debug!("Raw reqeust: {:?}", request);
@@ -46,7 +46,9 @@ fn main() -> Result<()>{
                 
                 let client_id: Option<String> = None;
                 let tag_buffer: Vec<&str> = Vec::new();
-                
+
+                let error_code: i16 = if 0 < request_api_version && request_api_version >= 4 {35} else {0};
+
                 let header = Header {
                     request_api_key: request_api_key,
                     request_api_version: request_api_version,
@@ -76,6 +78,8 @@ fn main() -> Result<()>{
 
                 res.extend_from_slice(&response.message_size.to_be_bytes());
                 res.extend_from_slice(&response.header.correlation_id.to_be_bytes());
+
+                res.extend_from_slice(&error_code.to_be_bytes());
 
                 let _ = _stream.write_all(&res);
             }
