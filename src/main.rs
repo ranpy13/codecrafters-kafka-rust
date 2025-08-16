@@ -123,8 +123,8 @@ fn main() -> Result<()>{
                 info!("Body tag buffer: {}", body.tag_buffer);
             
 
-                // let _ = _stream.write_all(&res);
-                let _ = _stream.write_all(&response.to_bytes());
+                let _ = _stream.write_all(&res);
+                // let _ = _stream.write_all(&response.to_bytes());
             }
             Err(e) => {
                 error!("error: {}", e);

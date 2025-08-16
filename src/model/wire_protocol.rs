@@ -38,9 +38,9 @@ impl<'a> Header<'a> {
     pub fn to_bytes(&self) -> Bytes {
         let mut header = BytesMut::new();
 
+        header.extend_from_slice(&self.correlation_id.to_be_bytes());
         header.extend_from_slice(&self.request_api_key.to_be_bytes());
         header.extend_from_slice(&self.request_api_version.to_be_bytes());
-        header.extend_from_slice(&self.correlation_id.to_be_bytes());
 
         match &self.client_id {
             Some(s) => {
