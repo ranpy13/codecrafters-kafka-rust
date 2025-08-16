@@ -91,9 +91,8 @@ fn main() -> Result<()>{
 
                 let mut res = Vec::new();
 
-                res.extend_from_slice(&response.message_size.to_be_bytes());
+                // res.extend_from_slice(&response.message_size.to_be_bytes());
                 res.extend_from_slice(&response.header.correlation_id.to_be_bytes());
-                res.extend_from_slice(&0i16.to_be_bytes());
 
                 info!("Message Size: {}", message_size);
                 info!("Correlation id: {}", correlation_id);
@@ -102,7 +101,7 @@ fn main() -> Result<()>{
                 // res.extend_from_slice(&response.header.request_api_key.to_be_bytes());
 
                 res.extend_from_slice(&response.body.error_code.to_be_bytes());
-                res.extend_from_slice(&response.body.array_length.to_be_bytes());
+                res.extend_from_slice(&(response.body.array_length as u8).to_be_bytes());
 
                 info!("Error Code: {}", error_code);
                 info!("Array length: {}", body.array_length);
@@ -124,8 +123,11 @@ fn main() -> Result<()>{
                 info!("Body tag buffer: {}", body.tag_buffer);
             
 
-                let _ = _stream.write_all(&res);
+                _stream.write(&res.len().to_be_bytes())?;
+                _stream.write_all(&res)?;
                 // let _ = _stream.write_all(&response.to_bytes());
+
+                debug!("Response bytes: {:?}", res);
             }
             Err(e) => {
                 error!("error: {}", e);
