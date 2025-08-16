@@ -9,7 +9,7 @@ use crate::model::wire_protocol::{self, ApiVersionArray, Body, Header, Response}
 use log::{info, warn, error, debug};
 use env_logger::Env;
 
-pub fn handle_stream(stream: &mut std::net::TcpStream) -> Result<()> {
+pub async fn handle_stream(stream: &mut std::net::TcpStream) -> Result<()> {
     loop {
         let mut len_buf = [0u8; 4];
 
@@ -90,4 +90,88 @@ pub fn handle_stream(stream: &mut std::net::TcpStream) -> Result<()> {
     }
 
     Ok(())
+}
+
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::TcpStream;
+use crate::model::request::request_api_versions;
+use crate::model::structs::{Builder, KafkaError, RespMessage, Streamable};
+use crate::model::structs::KafkaError::StringError;
+
+pub async fn handle_connection(mut stream: TcpStream) {
+    let mut buffer: Vec<u8> = Vec::with_capacity(1024);
+    //let mut cursor = 0;
+
+    // Read first 4 bytes (request_api_key + request_api_version)
+    //stream.read_buf(&mut buffer).await.expect("Reading the request, parsing it now..");
+
+
+
+    while let Ok(read_len) = stream.read_buf(&mut buffer).await {
+        info!("buffer = {:02x?} \t read_len = {:?}", buffer, read_len);
+
+        let (int_bytes, rest) = buffer.split_at(size_of::<i32>());
+        let req_size = i32::from_be_bytes(int_bytes.try_into().unwrap());
+
+        let (int_bytes, rest) = rest.split_at(size_of::<i16>());
+        let request_api_key = i16::from_be_bytes(int_bytes.try_into().unwrap());
+
+        let (int_bytes, rest) = rest.split_at(size_of::<i16>());
+        let request_api_version = i16::from_be_bytes(int_bytes.try_into().unwrap());
+
+        let (int_bytes, rest) = rest.split_at(size_of::<i32>());
+        let correlation_id = i32::from_be_bytes(int_bytes.try_into().unwrap());
+
+        let _body = if rest[0] != 0 {
+            let temp_rest = rest.to_vec();
+            let (int_bytes, inner_rest) = temp_rest.split_at(size_of::<i16>());
+            let string_len = i16::from_be_bytes(int_bytes.try_into().unwrap());
+            let body_string = String::from_utf8(inner_rest.to_vec());
+            info!("read ({:?}) => {:?}", string_len, body_string);
+            body_string.ok()
+        } else { None };
+
+        let body_vec = if rest[0] == 0 { None } else { Some(rest.to_vec()) };
+
+        info!("req_size = {:?}", req_size);
+        info!("request_api_key = {:?}", request_api_key);
+        info!("request_api_version = {:?}", request_api_version);
+        info!("correlation_id = {:?}", correlation_id);
+
+        // let mut new_resp = RespMessage::new();
+        // new_resp.change_correlation_id(correlation_id);
+        //
+        // // Calcul du message_size
+        // let mut message_size = 4;
+        // if new_resp.has_body() {
+        //     message_size += new_resp.body_len() as i32;
+        // }
+        // new_resp.change_message_size(message_size);
+
+        if let Ok(resp) = process_request(request_api_key, request_api_version, correlation_id, body_vec).await {
+            let resp_bytes = resp.to_hex();
+
+            debug!("resp_message = {:?}", resp);
+            debug!("bytes = {:02x?}", resp_bytes);
+
+            stream.write_all(resp_bytes.as_slice())
+                .await
+                .expect("Error writing in the provided TcpStream");
+        }
+
+        buffer.clear();
+    }
+
+
+}
+
+pub async fn process_request(request_api_key: i16, request_api_version: i16, correlation_id: i32, _request: Option<Vec<u8>>) -> Result<RespMessage, KafkaError> {
+    match request_api_key {
+        18 => {
+            request_api_versions(request_api_version, correlation_id).await
+        }
+        _ => {
+            Err(StringError("Error matching the request_api_key in fn process_request()".to_string()))
+        }
+    }
 }
