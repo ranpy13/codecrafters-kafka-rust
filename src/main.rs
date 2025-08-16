@@ -39,7 +39,7 @@ fn main() -> Result<()>{
                 debug!("Raw reqeust: {:?}", request);
                 
                 // let body: String = String::from("some random value");
-                let message_size = i32::from_be_bytes(request[0..4].try_into().unwrap());
+                // let message_size = i32::from_be_bytes(request[0..4].try_into().unwrap());
                 let request_api_key = i16::from_be_bytes(request[4..6].try_into().unwrap());
                 let request_api_version= i16::from_be_bytes(request[6..8].try_into().unwrap());
                 let correlation_id = i32::from_be_bytes(request[8..12].try_into().unwrap());
@@ -61,6 +61,8 @@ fn main() -> Result<()>{
                     &0, 
                     &0,
                 );
+
+                let message_size: i32 = body.to_bytes().len().try_into().unwrap(); 
 
                 let header = Header {
                     request_api_key: request_api_key,
@@ -89,7 +91,7 @@ fn main() -> Result<()>{
 
                 let mut res = Vec::new();
 
-                res.extend_from_slice(&response.message_size.to_be_bytes());
+                // res.extend_from_slice(&response.message_size.to_be_bytes());
                 res.extend_from_slice(&response.header.correlation_id.to_be_bytes());
 
                 info!("Message Size: {}", message_size);
@@ -121,7 +123,8 @@ fn main() -> Result<()>{
                 info!("Body tag buffer: {}", body.tag_buffer);
             
 
-                let _ = _stream.write_all(&res);
+                // let _ = _stream.write_all(&res);
+                let _ = _stream.write_all(&response.to_bytes());
             }
             Err(e) => {
                 error!("error: {}", e);

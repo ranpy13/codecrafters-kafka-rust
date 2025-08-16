@@ -3,6 +3,7 @@
 use std::ptr::null;
 
 use anyhow::Error;
+use bytes::{Bytes, BytesMut};
 
 #[derive(Clone)]
 pub struct Header<'a> {
@@ -32,6 +33,27 @@ impl<'a> Header<'a> {
 
     pub fn is_valid(&self) -> bool {
         return self.correlation_id.is_negative()
+    }
+    
+    pub fn to_bytes(&self) -> Bytes {
+        let mut header = BytesMut::new();
+
+        header.extend_from_slice(&self.request_api_key.to_be_bytes());
+        header.extend_from_slice(&self.request_api_version.to_be_bytes());
+        header.extend_from_slice(&self.correlation_id.to_be_bytes());
+
+        match &self.client_id {
+            Some(s) => {
+                header.extend_from_slice(s.as_bytes());
+            }
+            None => {
+
+            }
+            
+        }
+        header.extend_from_slice(&self.tag_buffer.iter().flat_map(|item| item.as_bytes()).copied().collect::<Vec<u8>>());
+
+        header.freeze()
     }
 }
 
@@ -67,6 +89,17 @@ impl ApiVersionArray {
             tag_buffer: *tag_buffer,
         }
     }
+
+    pub fn to_bytes(&self) -> Bytes {
+        let mut api_array = BytesMut::new();
+
+        api_array.extend_from_slice(&self.api_key.to_be_bytes());
+        api_array.extend_from_slice(&self.min_version.to_be_bytes());
+        api_array.extend_from_slice(&self.max_version.to_be_bytes());
+        api_array.extend_from_slice(&self.tag_buffer.to_be_bytes());
+
+        api_array.freeze()
+    }
 }
 
 impl Body {
@@ -78,6 +111,18 @@ impl Body {
             throttle_time: *throttle_time, 
             tag_buffer: *tag_buffer 
         }
+    }
+
+    pub fn to_bytes(&self) -> Bytes {
+        let mut body = BytesMut::new();
+
+        body.extend_from_slice(&self.error_code.to_be_bytes());
+        body.extend_from_slice(&self.array_length.to_be_bytes());
+        body.extend_from_slice(&self.api_version_array.to_bytes());
+        body.extend_from_slice(&self.throttle_time.to_be_bytes());
+        body.extend_from_slice(&self.tag_buffer.to_be_bytes());
+
+        body.freeze()
     }
 }
 
@@ -100,6 +145,16 @@ impl<'a> Response<'a> {
         };
 
         response
+    }
+
+    pub fn to_bytes(&self) -> Bytes {
+        let mut response = BytesMut::new();
+
+        response.extend_from_slice(&self.message_size.to_be_bytes());
+        response.extend_from_slice(&self.header.to_bytes());
+        response.extend_from_slice(&self.body.to_bytes());
+
+        response.freeze()
     }
 }
 
