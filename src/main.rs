@@ -5,7 +5,7 @@ use anyhow::Result;
 
 use bytes::{BufMut, BytesMut};
 
-use crate::model::wire_protocol::{self, Header, Response};
+use crate::model::wire_protocol::{self, ApiVersionArray, Body, Header, Response};
 use log::{info, warn, error, debug};
 use env_logger::Env;
 
@@ -38,7 +38,7 @@ fn main() -> Result<()>{
 
                 debug!("Raw reqeust: {:?}", request);
                 
-                let body: String = String::from("some random value");
+                // let body: String = String::from("some random value");
                 let message_size = i32::from_be_bytes(request[0..4].try_into().unwrap());
                 let request_api_key = i16::from_be_bytes(request[4..6].try_into().unwrap());
                 let request_api_version= i16::from_be_bytes(request[6..8].try_into().unwrap());
@@ -48,6 +48,19 @@ fn main() -> Result<()>{
                 let tag_buffer: Vec<&str> = Vec::new();
 
                 let error_code: i16 = if 0 < request_api_version && request_api_version >= 4 {35} else {0};
+
+                let body = Body::new(
+                    &error_code, 
+                    &2, 
+                    &ApiVersionArray::new(
+                        &18,
+                        &1,
+                        &4, 
+                        &0
+                    ), 
+                    &0, 
+                    &0,
+                );
 
                 let header = Header {
                     request_api_key: request_api_key,
@@ -79,7 +92,16 @@ fn main() -> Result<()>{
                 res.extend_from_slice(&response.message_size.to_be_bytes());
                 res.extend_from_slice(&response.header.correlation_id.to_be_bytes());
 
-                res.extend_from_slice(&error_code.to_be_bytes());
+                // res.extend_from_slice(&error_code.to_be_bytes());
+                // res.extend_from_slice(&response.header.request_api_key.to_be_bytes());
+
+                res.extend_from_slice(&response.body.error_code.to_be_bytes());
+                res.extend_from_slice(&response.body.array_length.to_be_bytes());
+                res.extend_from_slice(&response.body.api_version_array.api_key.to_be_bytes());
+                res.extend_from_slice(&response.body.api_version_array.min_version.to_be_bytes());
+                res.extend_from_slice(&response.body.api_version_array.max_version.to_be_bytes());
+                res.extend_from_slice(&response.body.throttle_time.to_be_bytes());
+            
 
                 let _ = _stream.write_all(&res);
             }

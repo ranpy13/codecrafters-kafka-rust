@@ -35,23 +35,63 @@ impl<'a> Header<'a> {
     }
 }
 
+#[derive(Clone, Copy)]
+pub struct ApiVersionArray {
+    pub api_key: i16,
+    pub min_version: i16, 
+    pub max_version: i16,
+    pub tag_buffer: i8,
+}
+
+#[derive(Clone, Copy)]
+pub struct Body {
+    pub error_code: i16,
+    pub array_length: i8,
+    pub api_version_array: ApiVersionArray,
+    pub throttle_time: i32,
+    pub tag_buffer: i8,
+}
+
 pub struct Request<'a> {
     message_size: i32,
     header: Header<'a>,
     body: String    
 }
 
+impl ApiVersionArray {
+    pub fn new(api_key: &i16, min_version: &i16, max_version: &i16, tag_buffer: &i8) -> Self {
+        Self {
+            api_key: *api_key,
+            min_version: *min_version,
+            max_version: *max_version,
+            tag_buffer: *tag_buffer,
+        }
+    }
+}
+
+impl Body {
+    pub fn new(error_code: &i16, array_length: &i8, api_version_array: &ApiVersionArray, throttle_time: &i32, tag_buffer: &i8) -> Self {
+        Self { 
+            error_code: *error_code, 
+            array_length: *array_length, 
+            api_version_array: *api_version_array, 
+            throttle_time: *throttle_time, 
+            tag_buffer: *tag_buffer 
+        }
+    }
+}
+
 pub struct Response<'a> {
     pub message_size: i32,
     pub header: Header<'a>,
-    pub body: String,
+    pub body: Body,
 }
 
 impl<'a> Response<'a> {
-    pub fn new(message_size: &i32, header: &Header<'a>, body: &String) -> Response<'a> {
+    pub fn new(message_size: &i32, header: &Header<'a>, body: &Body) -> Response<'a> {
         assert!(message_size.is_positive());
         assert!(!header.is_valid());
-        assert!(!body.is_empty());
+        // assert!(!body.is_empty());
 
         let response = Response {
             message_size: *message_size,
