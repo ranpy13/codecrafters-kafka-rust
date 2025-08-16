@@ -1,4 +1,5 @@
 #![allow(unused_imports)]
+
 use std::{io::{Write}, net::TcpListener};
 use anyhow::Result;
 
@@ -30,9 +31,10 @@ fn main() -> Result<()>{
                 println!("accepted new connection");
                 // return WireProtocol::Response::new(8, "v0", "some random body");
                 // let mut _stream = _stream;
-                _stream.write_all(&[0, 0, 0, 0, 0, 0, 0, 0]).unwrap();
+                _stream.write_all(&[0, 0, 0, 5, 0, 0, 0, 7]).unwrap();
 
-                let message_size = 1i32;
+                let body: String = String::from("some random value");
+                let message_size = 4i32 + body.len() as i32;
                 let correlation_id: i32 = 7i32;
 
                 let mut buf = BytesMut::with_capacity(8);
@@ -46,15 +48,15 @@ fn main() -> Result<()>{
                     correlation_id: correlation_id,
                 };
 
-                let header2 = Header::new(correlation_id)?;
+                let header2 = Header::new(&correlation_id)?;
 
                 let response = Response {
                     message_size: message_size,
                     header: header,
-                    body: String::from("something"),
+                    body: body.clone(),
                 };
 
-                let _response2 = Response::new(message_size, header2, String::from("some random body"));
+                let _response2 = Response::new(&message_size, &header2, &(body.clone()));
 
                 let mut res = Vec::new();
 
