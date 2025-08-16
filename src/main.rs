@@ -123,8 +123,12 @@ fn main() -> Result<()>{
                 info!("Body tag buffer: {}", body.tag_buffer);
             
 
-                _stream.write(&res.len().to_be_bytes())?;
-                _stream.write_all(&res)?;
+                // _stream.write(&res.len().to_be_bytes())?;
+                let mut payload = Vec::new();
+
+                payload.extend_from_slice(&(res.len() as i32).to_be_bytes());
+                payload.extend_from_slice(&res);
+                let _ = _stream.write_all(&res);
                 // let _ = _stream.write_all(&response.to_bytes());
 
                 debug!("Response bytes: {:?}", res);
