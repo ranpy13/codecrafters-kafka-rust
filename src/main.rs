@@ -126,9 +126,12 @@ fn main() -> Result<()>{
                 // _stream.write(&res.len().to_be_bytes())?;
                 let mut payload = Vec::new();
 
-                payload.extend_from_slice(&(res.len() as i32).to_be_bytes());
+                let len = res.len() as i32;
+                let len_bytes = len.to_be_bytes();
+
+                payload.extend_from_slice(&len_bytes);
                 payload.extend_from_slice(&res);
-                let _ = _stream.write_all(&res);
+                let _ = _stream.write_all(&payload);
                 // let _ = _stream.write_all(&response.to_bytes());
 
                 debug!("Response bytes: {:?}", res);
