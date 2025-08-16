@@ -47,7 +47,7 @@ fn main() -> Result<()>{
                 let client_id: Option<String> = None;
                 let tag_buffer: Vec<&str> = Vec::new();
 
-                let error_code: i16 = if 0 < request_api_version && request_api_version > 4 {35} else {0};
+                let error_code: i16 = if 0 < request_api_version || request_api_version > 4 {35} else {0};
 
                 let body = Body::new(
                     &error_code, 
