@@ -91,7 +91,7 @@ fn main() -> Result<()>{
 
                 let mut res = Vec::new();
 
-                // res.extend_from_slice(&response.message_size.to_be_bytes());
+                res.extend_from_slice(&response.message_size.to_be_bytes());
                 res.extend_from_slice(&response.header.correlation_id.to_be_bytes());
 
                 info!("Message Size: {}", message_size);
