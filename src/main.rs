@@ -92,19 +92,33 @@ fn main() -> Result<()>{
                 res.extend_from_slice(&response.message_size.to_be_bytes());
                 res.extend_from_slice(&response.header.correlation_id.to_be_bytes());
 
+                info!("Message Size: {}", message_size);
+                info!("Correlation id: {}", correlation_id);
+
                 // res.extend_from_slice(&error_code.to_be_bytes());
                 // res.extend_from_slice(&response.header.request_api_key.to_be_bytes());
 
                 res.extend_from_slice(&response.body.error_code.to_be_bytes());
                 res.extend_from_slice(&response.body.array_length.to_be_bytes());
+
+                info!("Error Code: {}", error_code);
+                info!("Array length: {}", body.array_length);
                 
                 res.extend_from_slice(&response.body.api_version_array.api_key.to_be_bytes());
                 res.extend_from_slice(&response.body.api_version_array.min_version.to_be_bytes());
                 res.extend_from_slice(&response.body.api_version_array.max_version.to_be_bytes());
                 res.extend_from_slice(&response.body.api_version_array.tag_buffer.to_be_bytes());
 
+                info!("Api Key: {}", body.api_version_array.api_key);
+                info!("Api Min supported version: {}", body.api_version_array.min_version);
+                info!("Api Max supported version: {}", body.api_version_array.max_version);
+                info!("Api tag buffer: {}", body.api_version_array.tag_buffer);
+
                 res.extend_from_slice(&response.body.throttle_time.to_be_bytes());
                 res.extend_from_slice(&response.body.tag_buffer.to_be_bytes());
+
+                info!("Throttle Time: {}", body.throttle_time);
+                info!("Body tag buffer: {}", body.tag_buffer);
             
 
                 let _ = _stream.write_all(&res);
