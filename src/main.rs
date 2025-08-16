@@ -6,7 +6,7 @@ use anyhow::Result;
 use bytes::{BufMut, BytesMut};
 
 use crate::model::wire_protocol::{self, Header, Response};
-use log::{info, warn, error};
+use log::{info, warn, error, debug};
 use env_logger::Env;
 
 mod model;
@@ -14,7 +14,7 @@ mod model;
 fn main() -> Result<()>{
     // env_logger::init();
     env_logger::Builder::new()
-    .filter_level(log::LevelFilter::Info)
+    .filter_level(log::LevelFilter::Debug)
     .init();
 
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -33,8 +33,10 @@ fn main() -> Result<()>{
                 // let mut _stream = _stream;
                 // _stream.write_all(&[0, 0, 0, 5, 0, 0, 0, 7]).unwrap();
 
-                let mut request = [0u8; 24];
+                let mut request = [0u8; 39];
                 _stream.read_exact(&mut request)?;
+
+                debug!("Raw reqeust: {:?}", request);
                 
                 let body: String = String::from("some random value");
                 let message_size = i32::from_be_bytes(request[0..4].try_into().unwrap());
@@ -78,7 +80,7 @@ fn main() -> Result<()>{
                 let _ = _stream.write_all(&res);
             }
             Err(e) => {
-                println!("error: {}", e);
+                error!("error: {}", e);
             }
         }
     }
