@@ -3,23 +3,22 @@
 pub mod model;
 pub mod utils;
 
-use std::sync::Arc;
-use tokio::io::{AsyncWriteExt, AsyncReadExt};
-use tokio::net::{TcpListener, TcpStream};
 use crate::utils::handler::handle_connection;
+use std::sync::Arc;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::{TcpListener, TcpStream};
 
-use log::{info, warn, error, debug};
 use env_logger::Env;
+use log::{debug, error, info, warn};
 
 #[tokio::main]
 async fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
-    
+
     env_logger::Builder::from_env(Env::default().default_filter_or("debug")).init();
     info!("Logs from your program will appear here!");
 
     let listener = TcpListener::bind("localhost:9092").await.unwrap();
-
 
     // loop {
     //     let (socket, _addr) = listener.accept().await.expect("NOK pour accept");
@@ -45,18 +44,12 @@ async fn main() {
 
     // Main loop
     loop {
-
         debug!("Spawning a thread with a new stream for each new connection");
         match listener.accept().await {
             Ok((stream, _)) => {
                 info!("accepted new connection");
-                // tokio::spawn({
-                //     async move {
-                //         handle_connection(stream).await
-                //     }
-                // });
-                handle_connection(stream).await
-            },
+                tokio::spawn(async move { handle_connection(stream).await });
+            }
 
             Err(e) => {
                 error!("error: {}", e);
